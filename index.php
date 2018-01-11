@@ -1,10 +1,10 @@
 ﻿<?php 
 require_once 'getdb.php';
 if (!empty($_GET['isbn']) OR !empty($_GET['name']) OR !empty($_GET['author']) OR !empty($_GET['year'])) {
-	$isbn = $_GET['isbn'];
-	$name = $_GET['name'];
-	$author = $_GET['author'];
-	$year = $_GET['year'];
+	$isbn = strip_tags($_GET['isbn']);
+	$name = strip_tags($_GET['name']);
+	$author = strip_tags($_GET['author']);
+	$year = strip_tags($_GET['year']);
 	$sql = "SELECT * FROM books WHERE (isbn LIKE '%$isbn%') AND (year LIKE '%$year%') AND (name LIKE '%$name%') AND (author LIKE '%$author%')";
 } else {
 	$sql = "SELECT * FROM books";
