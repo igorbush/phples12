@@ -1,13 +1,21 @@
 ﻿<?php 
 require_once 'getdb.php';
 if (!empty($_GET['isbn']) OR !empty($_GET['name']) OR !empty($_GET['author']) OR !empty($_GET['year'])) {
-	$isbn = strip_tags($_GET['isbn']);
-	$name = strip_tags($_GET['name']);
-	$author = strip_tags($_GET['author']);
-	$year = strip_tags($_GET['year']);
-	$sql = "SELECT * FROM books WHERE (isbn LIKE '%$isbn%') AND (year LIKE '%$year%') AND (name LIKE '%$name%') AND (author LIKE '%$author%')";
+	$sql = "SELECT * FROM books WHERE (isbn LIKE :isbn) AND (year LIKE :year) AND (name LIKE :name) AND (author LIKE :author)";
+	$res = $dbh->prepare($sql);
+	$res->bindParam(':isbn', $isbn);
+	$res->bindParam(':year', $year);
+	$res->bindParam(':name', $name);
+	$res->bindParam(':author', $author);
+	$isbn = "%" . strip_tags($_GET['isbn']) . "%";
+	$year = "%" . strip_tags($_GET['year']) . "%";
+	$name = "%" . strip_tags($_GET['name']) . "%";
+	$author = "%" . strip_tags($_GET['author']) . "%";
+	$res->execute();
+	$data = $res->fetchAll(PDO::FETCH_ASSOC);
 } else {
 	$sql = "SELECT * FROM books";
+	$data = $dbh->query($sql);
 }
 ?>
 <!DOCTYPE html>
@@ -22,10 +30,10 @@ if (!empty($_GET['isbn']) OR !empty($_GET['name']) OR !empty($_GET['author']) OR
 		<div class="row">
 			<form action="index.php" method="GET" class="form-inline">
 			
-				<input type="text" name="isbn" placeholder="ISBN" value="<?php if (!empty($_GET['isbn'])) {echo $isbn;} ?>" class="form-control mb-2">
-				<input type="text" name="name" placeholder="Название книги" value="<?php if (!empty($_GET['name'])) {echo $name;} ?>" class="form-control mb-2">
-				<input type="text" name="author" placeholder="Автор" value="<?php if (!empty($_GET['author'])) {echo $author;} ?>" class="form-control mb-2">
-				<input type="text" name="year" placeholder="Год" value="<?php if (!empty($_GET['year'])) {echo $year;} ?>" class="form-control mb-2">
+				<input type="text" name="isbn" placeholder="ISBN" value="<?php if (!empty($_GET['isbn'])) {echo $_GET['isbn'];} ?>" class="form-control mb-2">
+				<input type="text" name="name" placeholder="Название книги" value="<?php if (!empty($_GET['name'])) {echo $_GET['name'];} ?>" class="form-control mb-2">
+				<input type="text" name="author" placeholder="Автор" value="<?php if (!empty($_GET['author'])) {echo $_GET['author'];} ?>" class="form-control mb-2">
+				<input type="text" name="year" placeholder="Год" value="<?php if (!empty($_GET['year'])) {echo $_GET['year'];} ?>" class="form-control mb-2">
 				<input type="submit" class="btn btn-primary mb-2">
 	
 			</form>
@@ -40,7 +48,7 @@ if (!empty($_GET['isbn']) OR !empty($_GET['name']) OR !empty($_GET['author']) OR
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach ($dbh->query($sql) as $row): ?>
+					<?php foreach ($data as $row): ?>
 					<tr>
 						<td><?= $row['name'] ?></td>
 						<td><?= $row['author'] ?></td>
@@ -55,5 +63,3 @@ if (!empty($_GET['isbn']) OR !empty($_GET['name']) OR !empty($_GET['author']) OR
 	</div>
 </body>
 </html>
-
-<!-- OR (name LIKE '%$name%') OR (author LIKE '%$author%') -->
